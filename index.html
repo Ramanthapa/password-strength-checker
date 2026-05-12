@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Strength Checker - Raman Thapa</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0f0f0f;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #1a1a2e;
+      padding: 40px;
+      border-radius: 16px;
+      width: 420px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      color: #00fff5;
+    }
+
+    p {
+      color: #aaa;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    .input-box {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #0f0f1a;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      background: #00fff5;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .strength-bar {
+      background: #333;
+      border-radius: 10px;
+      height: 10px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 10px;
+      width: 0%;
+      border-radius: 10px;
+      transition: width 0.4s ease, background 0.4s ease;
+    }
+
+    .strength-label {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    #suggestions {
+      text-align: left;
+      padding-left: 20px;
+      color: #ff6b6b;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .credit {
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px solid #2a2a3d;
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .credit strong {
+      color: #00fff5;
+    }
+
+    .credit a {
+      color: #00fff5;
+      text-decoration: none;
+    }
+
+    .credit a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🔐 Password Strength Checker</h1>
+    <p>Type a password to check how strong it is</p>
+
+    <div class="input-box">
+      <input type="password" id="passwordInput" placeholder="Enter your password..." />
+      <button onclick="togglePassword()">👁</button>
+    </div>
+
+    <div class="strength-bar">
+      <div class="bar" id="strengthBar"></div>
+    </div>
+
+    <p id="strengthText" class="strength-label">Start typing...</p>
+
+    <ul id="suggestions"></ul>
+
+    <div class="credit">
+      <p>Built by <strong>Raman Thapa</strong></p>
+      <p>
+        🎓 BCA Final Year &nbsp;|&nbsp;
+        <a href="https://github.com/Ramanthapa" target="_blank">github.com/Ramanthapa</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('passwordInput');
+    const bar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    const suggestions = document.getElementById('suggestions');
+
+    const commonPasswords = ["password", "123456", "qwerty", "abc123", "password1"];
+
+    input.addEventListener('input', checkStrength);
+
+    function checkStrength() {
+      const password = input.value;
+      let score = 0;
+      let tips = [];
+
+      suggestions.innerHTML = '';
+
+      if (password.length === 0) {
+        bar.style.width = '0%';
+        strengthText.textContent = 'Start typing...';
+        strengthText.style.color = '#fff';
+        return;
+      }
+
+      if (commonPasswords.includes(password.toLowerCase())) {
+        bar.style.width = '10%';
+        bar.style.background = 'red';
+        strengthText.textContent = '❌ Too Common!';
+        strengthText.style.color = 'red';
+        showTip('This is one of the most common passwords. Change it!');
+        return;
+      }
+
+      if (password.length >= 8) score++;
+      else tips.push('Use at least 8 characters');
+
+      if (password.length >= 12) score++;
+
+      if (/[A-Z]/.test(password)) score++;
+      else tips.push('Add at least one uppercase letter (A-Z)');
+
+      if (/[a-z]/.test(password)) score++;
+      else tips.push('Add at least one lowercase letter (a-z)');
+
+      if (/[0-9]/.test(password)) score++;
+      else tips.push('Add at least one number (0-9)');
+
+      if (/[^A-Za-z0-9]/.test(password)) score++;
+      else tips.push('Add a special character like @, #, $, !');
+
+      if (score <= 2) {
+        bar.style.width = '25%';
+        bar.style.background = '#ff4d4d';
+        strengthText.textContent = '🔴 Weak Password';
+        strengthText.style.color = '#ff4d4d';
+      } else if (score <= 4) {
+        bar.style.width = '55%';
+        bar.style.background = '#ffa500';
+        strengthText.textContent = '🟠 Medium Password';
+        strengthText.style.color = '#ffa500';
+      } else if (score <= 5) {
+        bar.style.width = '80%';
+        bar.style.background = '#00cc66';
+        strengthText.textContent = '🟢 Strong Password';
+        strengthText.style.color = '#00cc66';
+      } else {
+        bar.style.width = '100%';
+        bar.style.background = '#00fff5';
+        strengthText.textContent = '💪 Very Strong Password!';
+        strengthText.style.color = '#00fff5';
+      }
+
+      tips.forEach(tip => showTip(tip));
+    }
+
+    function showTip(tip) {
+      const li = document.createElement('li');
+      li.textContent = tip;
+      suggestions.appendChild(li);
+    }
+
+    function togglePassword() {
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+
+</body>
+</html>
